@@ -6,16 +6,16 @@
 
 return [
     'database' => [
-        'host' => 'localhost',
+        'host' => '127.0.0.1',
         'port' => 3306,
-        'dbname' => 'parcel_lockers',
-        'username' => 'root',
-        'password' => '',
+        'dbname' => 'paketuki',
+        'username' => 'paketuki',
+        'password' => 'pKTk0220',
         'charset' => 'utf8mb4',
     ],
     
     'app' => [
-        'timezone' => 'Europe/Vienna',
+        'timezone' => 'Europe/Budapest',
         'debug' => false,
         'cache_ttl' => 300, // seconds
     ],

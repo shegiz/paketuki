@@ -4,7 +4,7 @@
 
 ### 1. Prerequisites
 
-- PHP 8.0+ with extensions: `pdo`, `pdo_mysql`, `curl`, `json`
+- PHP 7.4+ with extensions: `pdo`, `pdo_mysql`, `curl`, `json`
 - MySQL 8.0+
 - Composer
 - Web server (Apache/Nginx) or PHP built-in server
@@ -82,7 +82,8 @@ server {
     }
 
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.0-fpm.sock;
+        # Adjust PHP-FPM socket or host:port for your PHP 7.4 setup
+        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;

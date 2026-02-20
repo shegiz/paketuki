@@ -14,7 +14,7 @@ A web application that aggregates parcel locker / parcel automata locations from
 
 ## Requirements
 
-- PHP 8.0 or higher
+- PHP 7.4 or higher
 - MySQL 8.0 or higher
 - Web server (Apache/Nginx) with PHP support
 - Composer (for autoloading)

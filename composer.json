@@ -3,7 +3,7 @@
     "description": "Parcel Locker Map Aggregator - aggregates parcel locker locations from multiple vendors",
     "type": "project",
     "require": {
-        "php": ">=8.0"
+        "php": ">=7.4"
     },
     "autoload": {
         "psr-4": {

@@ -16,10 +16,10 @@ $warnings = [];
 
 // Check PHP version
 echo "Checking PHP version... ";
-if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
+if (version_compare(PHP_VERSION, '7.4.0', '>=')) {
     echo "✓ PHP " . PHP_VERSION . "\n";
 } else {
-    echo "✗ PHP " . PHP_VERSION . " (requires 8.0+)\n";
+    echo "✗ PHP " . PHP_VERSION . " (requires 7.4+)\n";
     $errors[] = "PHP version too old";
 }
 
