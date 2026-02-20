@@ -1,0 +1,18 @@
+{
+    "name": "paketuki/parcel-locker-aggregator",
+    "description": "Parcel Locker Map Aggregator - aggregates parcel locker locations from multiple vendors",
+    "type": "project",
+    "require": {
+        "php": ">=8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Paketuki\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Paketuki\\Tests\\": "tests/"
+        }
+    }
+}
