@@ -23,8 +23,8 @@
     Header set X-Content-Type-Options "nosniff"
 </IfModule>
 
-# PHP settings
-<IfModule mod_php7.c>
+# PHP settings (for Apache with libphp module; for PHP-FPM, configure via php.ini)
+<IfModule mod_php.c>
     php_value upload_max_filesize 10M
     php_value post_max_size 10M
     php_value max_execution_time 300
