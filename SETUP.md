@@ -30,6 +30,7 @@ mysql -u root -p -e "CREATE DATABASE parcel_lockers CHARACTER SET utf8mb4 COLLAT
 
 # Run migrations
 mysql -u root -p parcel_lockers < migrations/001_create_schema.sql
+mysql -u root -p parcel_lockers < migrations/002_add_vendor_logo.sql
 
 # Create logs directory
 mkdir -p logs

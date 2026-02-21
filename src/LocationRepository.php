@@ -187,7 +187,8 @@ class LocationRepository
                 l.last_seen_at,
                 l.last_updated_at,
                 v.code as vendor_code,
-                v.name as vendor_name
+                v.name as vendor_name,
+                v.logo_url as vendor_logo_url
             FROM locations l
             INNER JOIN vendors v ON l.vendor_id = v.id
             WHERE " . implode(' AND ', $where) . "

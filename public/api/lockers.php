@@ -82,6 +82,7 @@ try {
             'opening_hours' => $loc['opening_hours'],
             'vendor_code' => $loc['vendor_code'],
             'vendor_name' => $loc['vendor_name'],
+            'vendor_logo_url' => isset($loc['vendor_logo_url']) ? $loc['vendor_logo_url'] : null,
             'last_seen_at' => $loc['last_seen_at'],
             'last_updated_at' => $loc['last_updated_at'],
         ];

@@ -172,6 +172,70 @@ $logger = new Logger(__DIR__ . '/../logs/app.log', $config['app']['debug'] ?? fa
         .popup-detail strong {
             color: #212529;
         }
+        
+        /* Custom markers: vendor logo + type differentiation */
+        .marker-wrap {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            border: 2px solid #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+        }
+        .marker-type-bar {
+            height: 4px;
+            width: 100%;
+            flex-shrink: 0;
+        }
+        .marker-type-locker .marker-type-bar { background: #2563eb; }
+        .marker-type-parcel_shop .marker-type-bar { background: #7c3aed; }
+        .marker-type-pickup_point .marker-type-bar { background: #059669; }
+        .marker-type-dropoff_point .marker-type-bar { background: #ea580c; }
+        .marker-logo {
+            flex: 1;
+            width: 100%;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .marker-logo img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
+        .marker-fallback {
+            display: none;
+            font-size: 18px;
+            font-weight: bold;
+            color: #374151;
+        }
+        .marker-logo.has-img .marker-fallback { display: none; }
+        .marker-logo:not(.has-img) .marker-fallback { display: block; }
+        .marker-logo.has-img img[src=""], .marker-logo.has-img img:not([src]) { display: none !important; }
+        .custom-marker-icon { background: none !important; border: none !important; }
+        
+        .map-legend {
+            margin-top: 16px;
+            padding: 12px;
+            background: #fff;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            font-size: 12px;
+        }
+        .map-legend h3 { margin-bottom: 8px; font-size: 13px; color: #212529; }
+        .map-legend-item { display: flex; align-items: center; margin: 4px 0; }
+        .map-legend-swatch { width: 12px; height: 12px; border-radius: 2px; margin-right: 8px; flex-shrink: 0; }
+        .map-legend-swatch.locker { background: #2563eb; }
+        .map-legend-swatch.parcel_shop { background: #7c3aed; }
+        .map-legend-swatch.pickup_point { background: #059669; }
+        .map-legend-swatch.dropoff_point { background: #ea580c; }
     </style>
 </head>
 <body>
@@ -209,6 +273,14 @@ $logger = new Logger(__DIR__ . '/../logs/app.log', $config['app']['debug'] ?? fa
             <div class="status-info">
                 <strong>Status</strong>
                 <div id="status-text">Loading...</div>
+            </div>
+            
+            <div class="map-legend">
+                <h3>Types</h3>
+                <div class="map-legend-item"><span class="map-legend-swatch locker"></span> Locker</div>
+                <div class="map-legend-item"><span class="map-legend-swatch parcel_shop"></span> Parcel shop</div>
+                <div class="map-legend-item"><span class="map-legend-swatch pickup_point"></span> Pickup point</div>
+                <div class="map-legend-item"><span class="map-legend-swatch dropoff_point"></span> Drop-off point</div>
             </div>
         </div>
         
@@ -402,10 +474,11 @@ $logger = new Logger(__DIR__ . '/../logs/app.log', $config['app']['debug'] ?? fa
                 markerCluster.clearLayers();
                 markers = [];
                 
-                // Add new markers
+                // Add new markers (vendor logo + type differentiation)
                 if (data.items && Array.isArray(data.items)) {
                     data.items.forEach(item => {
-                        const marker = L.marker([item.lat, item.lon]);
+                        const icon = createMarkerIcon(item);
+                        const marker = L.marker([item.lat, item.lon], { icon: icon });
                         
                         const popupContent = `
                             <div class="popup-content">
@@ -436,9 +509,30 @@ $logger = new Logger(__DIR__ . '/../logs/app.log', $config['app']['debug'] ?? fa
         }
         
         function escapeHtml(text) {
+            if (text == null) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+        
+        function createMarkerIcon(item) {
+            const type = item.type || 'locker';
+            const typeClass = ['locker', 'parcel_shop', 'pickup_point', 'dropoff_point'].indexOf(type) >= 0 ? type : 'locker';
+            const logoUrl = (item.vendor_logo_url || '').trim();
+            const fallbackLetter = (type === 'parcel_shop' ? 'S' : type === 'pickup_point' ? 'P' : type === 'dropoff_point' ? 'D' : 'L');
+            const hasImg = logoUrl.length > 0;
+            const imgHtml = hasImg ? '<img src="' + escapeHtml(logoUrl) + '" alt="" onerror="this.style.display=\'none\';var n=this.nextElementSibling;if(n)n.style.display=\'block\'">' : '';
+            const fallbackHtml = '<span class="marker-fallback">' + escapeHtml(fallbackLetter) + '</span>';
+            const html = '<div class="marker-wrap marker-type-' + escapeHtml(typeClass) + '">' +
+                '<div class="marker-type-bar"></div>' +
+                '<div class="marker-logo' + (hasImg ? ' has-img' : '') + '">' + imgHtml + fallbackHtml + '</div>' +
+                '</div>';
+            return L.divIcon({
+                html: html,
+                className: 'custom-marker-icon',
+                iconSize: [40, 40],
+                iconAnchor: [20, 40]
+            });
         }
     </script>
 </body>
