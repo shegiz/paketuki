@@ -65,61 +65,77 @@ class FoxpostAdapter implements VendorAdapterInterface
         
         $locations = [];
         
+        // Foxpost API uses: place_id, operator_id, geolat, geolng, name, address, zip, city, street, country, open, service, isOutdoor, etc.
         foreach ($data as $item) {
-            // Validate required fields
-            if (empty($item['id']) || !isset($item['latitude']) || !isset($item['longitude'])) {
-                $this->logger->warning("Skipping Foxpost item with missing required fields", ['item' => $item]);
+            if (!is_array($item)) {
                 continue;
             }
-            
-            $lat = (float) $item['latitude'];
-            $lon = (float) $item['longitude'];
+            // Required: unique id and coordinates (Foxpost uses place_id, geolat, geolng)
+            $placeId = isset($item['place_id']) ? $item['place_id'] : (isset($item['id']) ? $item['id'] : null);
+            $lat = isset($item['geolat']) ? (float) $item['geolat'] : (isset($item['latitude']) ? (float) $item['latitude'] : null);
+            $lon = isset($item['geolng']) ? (float) $item['geolng'] : (isset($item['longitude']) ? (float) $item['longitude'] : null);
+            if ($placeId === null || $lat === null || $lon === null) {
+                $this->logger->warning("Skipping Foxpost item with missing required fields (place_id/id, geolat/latitude, geolng/longitude)", ['place_id' => $placeId, 'geolat' => isset($item['geolat']) ? $item['geolat'] : null, 'geolng' => isset($item['geolng']) ? $item['geolng'] : null]);
+                continue;
+            }
             
             // Validate coordinates
             if ($lat < -90 || $lat > 90 || $lon < -180 || $lon > 180) {
                 $this->logger->warning("Skipping Foxpost item with invalid coordinates", [
-                    'id' => $item['id'] ?? 'unknown',
+                    'place_id' => $placeId,
                     'lat' => $lat,
                     'lon' => $lon,
                 ]);
                 continue;
             }
             
-            // Normalize type
-            $type = $this->normalizeType($item['type'] ?? 'locker');
+            // Normalize type (API has variant e.g. "FOXPOST A-BOX", apmType e.g. "Rollkon")
+            $type = $this->normalizeType(isset($item['apmType']) ? $item['apmType'] : (isset($item['type']) ? $item['type'] : 'locker'));
             
-            // Normalize status
-            $status = $this->normalizeStatus($item['status'] ?? 'active');
+            // Normalize status (API may not expose status; assume active)
+            $status = $this->normalizeStatus(isset($item['status']) ? $item['status'] : 'active');
             
             // Extract address components
-            $addressLine = $item['address'] ?? $item['address_line'] ?? null;
-            $city = $item['city'] ?? null;
-            $postcode = $item['postcode'] ?? $item['zip'] ?? null;
-            $country = $item['country'] ?? 'HU';
+            $addressLine = isset($item['address']) ? $item['address'] : (isset($item['address_line']) ? $item['address_line'] : null);
+            $city = isset($item['city']) ? $item['city'] : null;
+            $postcode = isset($item['zip']) ? $item['zip'] : (isset($item['postcode']) ? $item['postcode'] : null);
+            $country = isset($item['country']) ? strtoupper((string) $item['country']) : 'HU';
             
             // Extract services
             $services = [];
-            if (isset($item['services']) && is_array($item['services'])) {
-                $services = $item['services'];
+            if (isset($item['service']) && is_array($item['service'])) {
+                $services['service'] = $item['service'];
             }
-            if (isset($item['available_24_7']) && $item['available_24_7']) {
-                $services['available_24_7'] = true;
+            if (isset($item['paymentOptions']) && is_array($item['paymentOptions'])) {
+                $services['payment_options'] = $item['paymentOptions'];
             }
-            if (isset($item['indoor']) && $item['indoor']) {
-                $services['indoor'] = true;
+            $services['card_payment'] = !empty($item['cardPayment']);
+            $services['indoor'] = isset($item['isOutdoor']) ? !$item['isOutdoor'] : null;
+            if (isset($item['variant'])) {
+                $services['variant'] = $item['variant'];
             }
+            // Derive 24/7 from open hours (e.g. "00:00-24:00")
+            $open = isset($item['open']) && is_array($item['open']) ? $item['open'] : [];
+            $all24_7 = count($open) > 0;
+            foreach ($open as $hours) {
+                if ((string) $hours !== '00:00-24:00') {
+                    $all24_7 = false;
+                    break;
+                }
+            }
+            $services['available_24_7'] = $all24_7;
             
-            // Opening hours
+            // Opening hours: Foxpost uses "open" object (hetfo, kedd, ...)
             $openingHours = null;
-            if (isset($item['opening_hours'])) {
-                $openingHours = is_array($item['opening_hours']) 
-                    ? json_encode($item['opening_hours']) 
-                    : (string) $item['opening_hours'];
+            if (isset($item['open']) && is_array($item['open'])) {
+                $openingHours = json_encode($item['open']);
+            } elseif (isset($item['opening_hours'])) {
+                $openingHours = is_array($item['opening_hours']) ? json_encode($item['opening_hours']) : (string) $item['opening_hours'];
             }
             
             $locations[] = [
-                'vendor_location_id' => (string) $item['id'],
-                'name' => $item['name'] ?? $item['title'] ?? "Foxpost {$item['id']}",
+                'vendor_location_id' => (string) $placeId,
+                'name' => isset($item['name']) ? $item['name'] : (isset($item['title']) ? $item['title'] : "Foxpost {$placeId}"),
                 'type' => $type,
                 'status' => $status,
                 'lat' => $lat,
@@ -149,6 +165,9 @@ class FoxpostAdapter implements VendorAdapterInterface
             'locker' => 'locker',
             'parcel_locker' => 'locker',
             'automata' => 'locker',
+            'rollkon' => 'locker',
+            'cleveron' => 'locker',
+            'keba' => 'locker',
             'parcel_shop' => 'parcel_shop',
             'shop' => 'parcel_shop',
             'dropoff' => 'dropoff_point',
