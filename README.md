@@ -60,7 +60,7 @@ Edit `config/config.php`:
 'database' => [
     'host' => 'localhost',
     'port' => 3306,
-    'dbname' => 'parcel_lockers',
+    'dbname' => 'paketuki',
     'username' => 'your_username',
     'password' => 'your_password',
     'charset' => 'utf8mb4',

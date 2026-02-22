@@ -26,11 +26,11 @@ cp config/config.example.php config/config.php
 # nano config/config.php
 
 # Create database
-mysql -u root -p -e "CREATE DATABASE parcel_lockers CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p -e "CREATE DATABASE paketuki CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 # Run migrations
-mysql -u root -p parcel_lockers < migrations/001_create_schema.sql
-mysql -u root -p parcel_lockers < migrations/002_add_vendor_logo.sql
+mysql -u root -p paketuki < migrations/001_create_schema.sql
+mysql -u root -p paketuki < migrations/002_add_vendor_logo.sql
 
 # Create logs directory
 mkdir -p logs
@@ -149,7 +149,7 @@ sudo systemctl start parcel-lockers-sync.timer
 
 1. Check database:
    ```bash
-   mysql -u root -p parcel_lockers -e "SELECT COUNT(*) FROM locations;"
+   mysql -u root -p paketuki -e "SELECT COUNT(*) FROM locations;"
    ```
 
 2. Check logs:

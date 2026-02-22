@@ -15,8 +15,8 @@ cp config/config.example.php config/config.php
 
 ### 3. Create Database
 ```bash
-mysql -u root -p -e "CREATE DATABASE parcel_lockers CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql -u root -p parcel_lockers < migrations/001_create_schema.sql
+mysql -u root -p -e "CREATE DATABASE paketuki CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p paketuki < migrations/001_create_schema.sql
 ```
 
 ### 4. Run Initial Sync
@@ -51,8 +51,8 @@ tail -f logs/sync.log
 tail -f logs/app.log
 
 # Database queries
-mysql -u root -p parcel_lockers -e "SELECT COUNT(*) FROM locations;"
-mysql -u root -p parcel_lockers -e "SELECT * FROM vendors;"
+mysql -u root -p paketuki -e "SELECT COUNT(*) FROM locations;"
+mysql -u root -p paketuki -e "SELECT * FROM vendors;"
 ```
 
 ## Troubleshooting

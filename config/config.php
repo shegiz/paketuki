@@ -1,21 +1,21 @@
 <?php
 /**
- * Configuration file
- * Copy from config.example.php and adjust values
+ * Configuration file example
+ * Copy to config.php and adjust values
  */
 
 return [
     'database' => [
-        'host' => 'localhost',
+        'host' => '127.0.0.1',
         'port' => 3306,
-        'dbname' => 'parcel_lockers',
-        'username' => 'root',
+        'dbname' => 'paketuki',
+        'username' => 'paketuki',
         'password' => '',
         'charset' => 'utf8mb4',
     ],
     
     'app' => [
-        'timezone' => 'Europe/Vienna',
+        'timezone' => 'Europe/Budapest',
         'debug' => false,
         'cache_ttl' => 300, // seconds
     ],

@@ -76,7 +76,7 @@ php scripts/test_foxpost.php  # Create similar test for your adapter
 php scripts/sync_all.php
 
 # Verify in database
-mysql -u root -p parcel_lockers -e "SELECT COUNT(*) FROM locations WHERE vendor_id = (SELECT id FROM vendors WHERE code = 'dhl');"
+mysql -u root -p paketuki -e "SELECT COUNT(*) FROM locations WHERE vendor_id = (SELECT id FROM vendors WHERE code = 'dhl');"
 ```
 
 ## Code Style
