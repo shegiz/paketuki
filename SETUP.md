@@ -34,6 +34,7 @@ mysql -u root -p -e "CREATE DATABASE paketuki CHARACTER SET utf8mb4 COLLATE utf8
 # Run migrations
 mysql -u root -p paketuki < migrations/001_create_schema.sql
 mysql -u root -p paketuki < migrations/002_add_vendor_logo.sql
+mysql -u root -p paketuki < migrations/003_add_gls_vendor.sql
 
 # Create logs directory
 mkdir -p logs

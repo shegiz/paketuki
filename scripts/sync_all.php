@@ -11,6 +11,7 @@ use Paketuki\Database;
 use Paketuki\Logger;
 use Paketuki\SyncService;
 use Paketuki\Adapters\FoxpostAdapter;
+use Paketuki\Adapters\GlsAdapter;
 
 // Load configuration
 $config = require __DIR__ . '/../config/config.php';
@@ -28,9 +29,7 @@ try {
     
     // Register adapters
     $syncService->registerAdapter('foxpost', new FoxpostAdapter($logger));
-    
-    // Add more adapters here as needed
-    // $syncService->registerAdapter('other_vendor', new OtherVendorAdapter($logger));
+    $syncService->registerAdapter('gls', new GlsAdapter($logger));
     
     // Sync all vendors
     $results = $syncService->syncAll();
