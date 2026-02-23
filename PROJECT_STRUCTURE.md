@@ -6,7 +6,9 @@
 paketuki/
 ├── config/                      # Configuration files
 │   ├── config.example.php      # Example configuration (copy to config.php)
-│   └── config.php              # Actual configuration (gitignored)
+│   ├── config.php              # Actual configuration (gitignored)
+│   ├── secrets.example.php     # Example secrets (copy to secrets.php on server)
+│   └── secrets.php              # Passwords only – server-only (gitignored)
 │
 ├── migrations/                  # Database migrations
 │   └── 001_create_schema.sql    # Initial database schema

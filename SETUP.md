@@ -21,9 +21,12 @@ composer install
 
 # Copy configuration
 cp config/config.example.php config/config.php
+cp config/secrets.example.php config/secrets.php
 
-# Edit config/config.php with your database credentials
+# Edit config/config.php for host, dbname, username, etc.
+# Put the database password only in config/secrets.php (this file stays on the server, do not commit)
 # nano config/config.php
+# nano config/secrets.php   # set 'database' => ['password' => 'your_password']
 
 # Create database
 mysql -u root -p -e "CREATE DATABASE paketuki CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"

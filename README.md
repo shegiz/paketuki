@@ -33,8 +33,8 @@ A web application that aggregates parcel locker / parcel automata locations from
    ```
 
 3. **Configure database**
-   - Copy `config/config.example.php` to `config/config.php`
-   - Edit `config/config.php` with your database credentials
+   - Copy `config/config.example.php` to `config/config.php` and `config/secrets.example.php` to `config/secrets.php`
+   - Edit `config/config.php` for host, dbname, username; put the database password only in `config/secrets.php` (server-only, do not commit)
 
 4. **Create database and run migrations**
    ```bash
@@ -54,17 +54,20 @@ A web application that aggregates parcel locker / parcel automata locations from
 
 ### Database
 
-Edit `config/config.php`:
+Edit `config/config.php` for host, dbname, username. Put the database password in `config/secrets.php` (copy from `config/secrets.example.php`) so it is only stored on the server:
 
 ```php
+// config/config.php – non-sensitive options
 'database' => [
     'host' => 'localhost',
     'port' => 3306,
     'dbname' => 'paketuki',
     'username' => 'your_username',
-    'password' => 'your_password',
+    'password' => '',  // overridden by config/secrets.php
     'charset' => 'utf8mb4',
 ],
+// config/secrets.php – server only, do not commit
+return ['database' => ['password' => 'your_password']];
 ```
 
 ### Cron Job
@@ -85,7 +88,8 @@ crontab -e
 paketuki/
 ├── config/              # Configuration files
 │   ├── config.example.php
-│   └── config.php       # (create from example)
+│   ├── config.php       # (create from example)
+│   └── secrets.php      # (create from secrets.example.php, server only)
 ├── migrations/          # Database migrations
 │   └── 001_create_schema.sql
 ├── public/              # Web entry points

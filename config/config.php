@@ -1,16 +1,16 @@
 <?php
 /**
- * Configuration file example
- * Copy to config.php and adjust values
+ * Configuration file
+ * Sensitive values (e.g. database password) are loaded from config/secrets.php on the server.
  */
 
-return [
+$config = [
     'database' => [
         'host' => '127.0.0.1',
         'port' => 3306,
         'dbname' => 'paketuki',
         'username' => 'paketuki',
-        'password' => '',
+        'password' => '', // set in config/secrets.php on the server
         'charset' => 'utf8mb4',
     ],
     
@@ -39,3 +39,13 @@ return [
         'cache_ttl' => 86400, // 24 hours
     ],
 ];
+
+// Merge server-only secrets (config/secrets.php) if present
+if (is_file(__DIR__ . '/secrets.php')) {
+    $secrets = require __DIR__ . '/secrets.php';
+    if (!empty($secrets['database']) && is_array($secrets['database'])) {
+        $config['database'] = array_merge($config['database'], $secrets['database']);
+    }
+}
+
+return $config;

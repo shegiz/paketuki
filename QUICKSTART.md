@@ -10,7 +10,9 @@ composer install
 ### 2. Configure Database
 ```bash
 cp config/config.example.php config/config.php
-# Edit config/config.php with your database credentials
+cp config/secrets.example.php config/secrets.php
+# Edit config/config.php for host, dbname, username
+# Edit config/secrets.php and set database password (this file is server-only, do not commit)
 ```
 
 ### 3. Create Database

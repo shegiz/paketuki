@@ -1,0 +1,14 @@
+/vendor/
+/node_modules/
+/config/config.php
+/config/secrets.php
+/.env
+/logs/
+/cache/
+*.log
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
