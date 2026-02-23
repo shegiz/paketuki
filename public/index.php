@@ -45,21 +45,32 @@ $logger = new Logger(__DIR__ . '/../logs/app.log', $config['app']['debug'] ?? fa
         }
         
         #app {
-            display: flex;
+            position: relative;
             height: 100vh;
         }
         
         #sidebar {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
             width: 320px;
-            background: #f8f9fa;
-            border-right: 1px solid #dee2e6;
+            max-height: calc(100vh - 40px);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
             padding: 20px;
             overflow-y: auto;
-            box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
         }
         
         #map {
-            flex: 1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             height: 100vh;
         }
         
