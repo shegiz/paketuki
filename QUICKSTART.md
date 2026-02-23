@@ -21,6 +21,7 @@ mysql -u root -p -e "CREATE DATABASE paketuki CHARACTER SET utf8mb4 COLLATE utf8
 mysql -u root -p paketuki < migrations/001_create_schema.sql
 mysql -u root -p paketuki < migrations/002_add_vendor_logo.sql
 mysql -u root -p paketuki < migrations/003_add_gls_vendor.sql
+mysql -u root -p paketuki < migrations/004_add_gls_cz_sk_ro.sql
 ```
 
 ### 4. Run Initial Sync

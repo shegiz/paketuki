@@ -30,6 +30,9 @@ try {
     // Register adapters
     $syncService->registerAdapter('foxpost', new FoxpostAdapter($logger));
     $syncService->registerAdapter('gls', new GlsAdapter($logger));
+    $syncService->registerAdapter('gls_cz', new GlsAdapter($logger));
+    $syncService->registerAdapter('gls_sk', new GlsAdapter($logger));
+    $syncService->registerAdapter('gls_ro', new GlsAdapter($logger));
     
     // Sync all vendors
     $results = $syncService->syncAll();
