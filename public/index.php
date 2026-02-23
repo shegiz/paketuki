@@ -458,9 +458,10 @@ $logger = new Logger(__DIR__ . '/../logs/app.log', $config['app']['debug'] ?? fa
             // Get search query
             const searchQuery = document.getElementById('search').value.trim();
             
-            // Build query params
+            // Build query params: all markers in current map area, no country isolation, clustered
             const params = new URLSearchParams({
                 bbox: bbox,
+                limit: 50000  // fetch all points in view (multiple countries combined)
             });
             
             if (selectedVendors.length > 0 && selectedVendors.length < vendors.length) {

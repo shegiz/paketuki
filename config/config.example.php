@@ -29,7 +29,7 @@ $config = [
     ],
     
     'api' => [
-        'max_results' => 5000,
+        'max_results' => 50000,  // all markers in map area (no country cap)
         'default_limit' => 1000,
     ],
     

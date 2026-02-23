@@ -52,10 +52,12 @@ try {
         $filters['q'] = trim($_GET['q']);
     }
     
-    $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : ($config['api']['default_limit'] ?? 1000);
-    $limit = min($limit, $config['api']['max_results'] ?? 5000);
+    $defaultLimit = $config['api']['default_limit'] ?? 1000;
+    $maxResults = $config['api']['max_results'] ?? 50000;
+    $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : $defaultLimit;
+    $limit = min(max(1, $limit), $maxResults);
     
-    // Fetch locations
+    // Fetch locations (all in bbox, no country filter – show every vendor/country in map area)
     $locations = $locationRepo->findByBboxAndFilters($bbox, $filters, $limit);
     
     // Format response
