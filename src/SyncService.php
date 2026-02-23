@@ -57,75 +57,82 @@ class SyncService
     }
 
     /**
-     * Sync a single vendor
+     * Sync a single vendor (supports multiple feeds via vendor_feeds table)
      */
     public function syncVendor(array $vendor): array
     {
         $vendorCode = $vendor['code'];
         $vendorId = $vendor['id'];
-        $apiUrl = $vendor['api_url'];
-        
+
         $this->logger->info("Starting sync for vendor: {$vendorCode}");
-        
+
         // Start sync run
         $runId = $this->startSyncRun($vendorId);
-        
+
         try {
-            // Get adapter
             if (!isset($this->adapters[$vendorCode])) {
                 throw new \RuntimeException("No adapter registered for vendor: {$vendorCode}");
             }
-            
+
             $adapter = $this->adapters[$vendorCode];
-            
-            // Fetch data with retries
-            $raw = $this->fetchWithRetry($adapter, $apiUrl, $vendorCode);
-            
-            // Save payload snapshot
-            $this->savePayloadSnapshot($vendorId, $raw);
-            
-            // Parse data
-            $locations = $adapter->parse($raw);
-            
-            // Upsert locations
+            $vendorRepo = new VendorRepository($this->db);
+            $feeds = $vendorRepo->getFeedsForVendor($vendorId);
+
+            if (empty($feeds)) {
+                throw new \RuntimeException("Vendor {$vendorCode} has no feed URL configured");
+            }
+
             $locationRepo = new LocationRepository($this->db, $this->logger);
-            $created = 0;
-            $updated = 0;
-            
-            foreach ($locations as $locationData) {
-                // Check if exists
-                $exists = $this->locationExists($vendorId, $locationData['vendor_location_id']);
-                
-                if ($locationRepo->upsert($vendorId, $locationData)) {
-                    if ($exists) {
-                        $updated++;
-                    } else {
-                        $created++;
+            $totalCreated = 0;
+            $totalUpdated = 0;
+            $totalLocations = 0;
+
+            foreach ($feeds as $feed) {
+                $apiUrl = $feed['url'];
+                $feedKey = isset($feed['feed_key']) ? trim((string) $feed['feed_key']) : '';
+
+                $raw = $this->fetchWithRetry($adapter, $apiUrl, $vendorCode);
+                $this->savePayloadSnapshot($vendorId, $raw);
+
+                $locations = $adapter->parse($raw);
+
+                foreach ($locations as $locationData) {
+                    $locationId = $locationData['vendor_location_id'];
+                    if ($feedKey !== '') {
+                        $locationData['vendor_location_id'] = $feedKey . '_' . $locationId;
+                    }
+
+                    $exists = $this->locationExists($vendorId, $locationData['vendor_location_id']);
+                    if ($locationRepo->upsert($vendorId, $locationData)) {
+                        if ($exists) {
+                            $totalUpdated++;
+                        } else {
+                            $totalCreated++;
+                        }
+                        $totalLocations++;
                     }
                 }
             }
-            
-            // Mark inactive locations
+
             $thresholdDays = $this->config['inactive_threshold_days'] ?? 7;
             $inactivated = $locationRepo->markInactiveByVendor($vendorId, $thresholdDays);
-            
-            // Complete sync run
-            $this->completeSyncRun($runId, $created, $updated, $inactivated);
-            
+
+            $this->completeSyncRun($runId, $totalCreated, $totalUpdated, $inactivated);
+
             $this->logger->info("Sync completed for vendor: {$vendorCode}", [
-                'created' => $created,
-                'updated' => $updated,
+                'created' => $totalCreated,
+                'updated' => $totalUpdated,
                 'inactivated' => $inactivated,
             ]);
-            
+
             return [
                 'success' => true,
-                'created' => $created,
-                'updated' => $updated,
+                'created' => $totalCreated,
+                'updated' => $totalUpdated,
                 'inactivated' => $inactivated,
-                'total' => count($locations),
+                'total' => $totalLocations,
             ];
-            
+
         } catch (\Exception $e) {
             $this->failSyncRun($runId, $e->getMessage());
             throw $e;

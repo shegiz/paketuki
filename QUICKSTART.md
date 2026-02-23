@@ -22,6 +22,7 @@ mysql -u root -p paketuki < migrations/001_create_schema.sql
 mysql -u root -p paketuki < migrations/002_add_vendor_logo.sql
 mysql -u root -p paketuki < migrations/003_add_gls_vendor.sql
 mysql -u root -p paketuki < migrations/004_add_gls_cz_sk_ro.sql
+mysql -u root -p paketuki < migrations/005_merge_gls_vendors.sql
 ```
 
 ### 4. Run Initial Sync
