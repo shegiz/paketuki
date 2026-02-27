@@ -13,6 +13,7 @@ use Paketuki\SyncService;
 use Paketuki\Adapters\FoxpostAdapter;
 use Paketuki\Adapters\GlsAdapter;
 use Paketuki\Adapters\MplAdapter;
+use Paketuki\Adapters\SamedayAdapter;
 
 // Load configuration
 $config = require __DIR__ . '/../config/config.php';
@@ -32,6 +33,7 @@ try {
     $syncService->registerAdapter('foxpost', new FoxpostAdapter($logger));
     $syncService->registerAdapter('gls', new GlsAdapter($logger));
     $syncService->registerAdapter('mpl', new MplAdapter($logger));
+    $syncService->registerAdapter('sameday', new SamedayAdapter($logger));
     
     // Sync all vendors
     $results = $syncService->syncAll();
