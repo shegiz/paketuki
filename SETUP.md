@@ -39,6 +39,7 @@ mysql -u root -p paketuki < migrations/004_add_gls_cz_sk_ro.sql
 mysql -u root -p paketuki < migrations/005_merge_gls_vendors.sql
 mysql -u root -p paketuki < migrations/006_add_mpl_vendor.sql
 mysql -u root -p paketuki < migrations/007_add_sameday_vendor.sql
+mysql -u root -p paketuki < migrations/008_add_packeta_vendor.sql
 
 # Create logs directory
 mkdir -p logs
