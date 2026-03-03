@@ -64,7 +64,7 @@ class SamedayAdapter implements VendorAdapterInterface
 
         $items = [];
         if (is_array($data)) {
-            $items = isset($data[0]) && is_array($data[0]) ? $data : (isset($data['data']) ? $data['data'] : (isset($data['lockers']) ? $data['lockers'] : (isset($data['items']) ? $data['items'] : []));
+            $items = isset($data[0]) && is_array($data[0]) ? $data : (isset($data['data']) ? $data['data'] : (isset($data['lockers']) ? $data['lockers'] : (isset($data['items']) ? $data['items'] : [])));
         } elseif (is_array($data['data'] ?? null)) {
             $items = $data['data'];
         } elseif (is_array($data['lockers'] ?? null)) {
