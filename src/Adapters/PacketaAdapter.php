@@ -10,7 +10,8 @@ use Paketuki\Logger;
  * Expects JSON: array of branches, or object with "data" / "branches" / "pickupPoints" array.
  * Each item: id or branchId/pointId, name or branchName, address/street, city, zip/postalCode,
  * latitude/longitude or lat/lng.
- * API typically requires credentials; set api_url (and optional API key in request) when available.
+ * API typically requires credentials. Use a feed URL with HTTP Basic auth if needed, e.g.
+ * https://your_api_password:@api.packeta.com/... (password before the colon).
  */
 class PacketaAdapter implements VendorAdapterInterface
 {
@@ -71,20 +72,7 @@ class PacketaAdapter implements VendorAdapterInterface
             throw new \RuntimeException("Packeta JSON parse error: " . json_last_error_msg());
         }
 
-        $items = [];
-        if (is_array($data)) {
-            if (isset($data[0]) && is_array($data[0])) {
-                $items = $data;
-            } elseif (isset($data['data']) && is_array($data['data'])) {
-                $items = $data['data'];
-            } elseif (isset($data['branches']) && is_array($data['branches'])) {
-                $items = $data['branches'];
-            } elseif (isset($data['pickupPoints']) && is_array($data['pickupPoints'])) {
-                $items = $data['pickupPoints'];
-            } elseif (isset($data['results']) && is_array($data['results'])) {
-                $items = $data['results'];
-            }
-        }
+        $items = $this->extractItemsArray($data);
 
         $locations = [];
         foreach ($items as $item) {
@@ -92,7 +80,7 @@ class PacketaAdapter implements VendorAdapterInterface
                 continue;
             }
 
-            $id = isset($item['id']) ? (string) $item['id'] : (isset($item['branchId']) ? (string) $item['branchId'] : (isset($item['pointId']) ? (string) $item['pointId'] : null));
+            $id = $this->extractId($item);
             if ($id === null || $id === '') {
                 continue;
             }
@@ -104,8 +92,8 @@ class PacketaAdapter implements VendorAdapterInterface
                 continue;
             }
 
-            $name = isset($item['name']) ? (string) $item['name'] : (isset($item['branchName']) ? (string) $item['branchName'] : "Packeta {$id}");
-            $addressLine = isset($item['address']) ? (string) $item['address'] : (isset($item['street']) ? (string) $item['street'] : null);
+            $name = isset($item['name']) ? (string) $item['name'] : (isset($item['branchName']) ? (string) $item['branchName'] : (isset($item['label']) ? (string) $item['label'] : "Packeta {$id}"));
+            $addressLine = isset($item['address']) ? (string) $item['address'] : (isset($item['street']) ? (string) $item['street'] : (isset($item['streetName']) ? (string) $item['streetName'] : (isset($item['addressStreet']) ? (string) $item['addressStreet'] : null)));
             $city = isset($item['city']) ? (string) $item['city'] : null;
             $postcode = isset($item['zip']) ? (string) $item['zip'] : (isset($item['postalCode']) ? (string) $item['postalCode'] : null);
             $country = isset($item['country']) ? strtoupper(substr((string) $item['country'], 0, 2)) : (isset($item['countryCode']) ? strtoupper(substr((string) $item['countryCode'], 0, 2)) : null);
@@ -135,6 +123,58 @@ class PacketaAdapter implements VendorAdapterInterface
     }
 
     /**
+     * Extract items array from API response (array or object with known keys or fallback scan).
+     *
+     * @param mixed $data
+     * @return array<int, array>
+     */
+    private function extractItemsArray($data): array
+    {
+        if (!is_array($data)) {
+            return [];
+        }
+        $knownKeys = [
+            'data', 'branches', 'pickupPoints', 'results', 'branchList', 'branch_list',
+            'points', 'list', 'items', 'branch', 'pickup_points',
+        ];
+        foreach ($knownKeys as $key) {
+            if (isset($data[$key]) && is_array($data[$key])) {
+                $candidate = $data[$key];
+                if (isset($candidate[0]) && is_array($candidate[0])) {
+                    return $candidate;
+                }
+            }
+        }
+        if (isset($data[0]) && is_array($data[0])) {
+            return $data;
+        }
+        foreach ($data as $value) {
+            if (is_array($value) && isset($value[0]) && is_array($value[0])) {
+                $first = $value[0];
+                if (isset($first['id']) || isset($first['branchId']) || isset($first['pointId'])
+                    || isset($first['internalId']) || isset($first['name'])) {
+                    return $value;
+                }
+            }
+        }
+        return [];
+    }
+
+    /**
+     * @param array $item
+     * @return string|null
+     */
+    private function extractId(array $item): ?string
+    {
+        foreach (['id', 'branchId', 'pointId', 'internalId', 'branch_id'] as $key) {
+            if (isset($item[$key]) && (string) $item[$key] !== '') {
+                return (string) $item[$key];
+            }
+        }
+        return null;
+    }
+
+    /**
      * @param array $item
      * @return float|null
      */
@@ -145,6 +185,9 @@ class PacketaAdapter implements VendorAdapterInterface
         }
         if (isset($item['lat'])) {
             return (float) $item['lat'];
+        }
+        if (isset($item['gpsLat'])) {
+            return (float) $item['gpsLat'];
         }
         if (isset($item['location']) && is_array($item['location'])) {
             $loc = $item['location'];
@@ -167,6 +210,9 @@ class PacketaAdapter implements VendorAdapterInterface
         }
         if (isset($item['lon'])) {
             return (float) $item['lon'];
+        }
+        if (isset($item['gpsLng'])) {
+            return (float) $item['gpsLng'];
         }
         if (isset($item['location']) && is_array($item['location'])) {
             $loc = $item['location'];
