@@ -247,6 +247,11 @@ $logger = new Logger(__DIR__ . '/../logs/app.log', $config['app']['debug'] ?? fa
         .map-legend-swatch.parcel_shop { background: #7c3aed; }
         .map-legend-swatch.pickup_point { background: #059669; }
         .map-legend-swatch.dropoff_point { background: #ea580c; }
+
+        /* Make base map tiles black & white, keep UI/markers colored */
+        .leaflet-tile-pane {
+            filter: grayscale(1);
+        }
     </style>
 </head>
 <body>
